@@ -6,6 +6,7 @@ use App\Mail\MessageMail;
 use App\Mail\VerifyEmail;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -71,10 +72,16 @@ class AuthController extends Controller
             ]);
         }
 
+        if(!$user->email_verified_at){
+            return response()->json([
+                'message' => 'Email Verification is required!',
+            ]);
+        }
+
         $token = JWTAuth::attempt($request->only('email', 'password'));
 
         return response()->json([
-            'message' => 'Logic successful',
+            'message' => 'Login successful',
             'token' => $token,
             'user' => $user,
         ]);
@@ -83,6 +90,8 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
+        // $user = Auth::user();
+        // $user = auth()->user();
 
         if(!$user){
             return response()->json([
